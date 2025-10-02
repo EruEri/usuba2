@@ -15,6 +15,7 @@ module Idents = Set.Make (Ast.TermIdent)
 module MIdents = Map.Make (Ast.TermIdent)
 module ReindexWrap = ReindexWrap
 
+(*
 module InlineLet = struct
   module Env = struct
     type t = Ast.(term tys) MIdents.t
@@ -439,3 +440,4 @@ module Dup = struct
         body;
       }
 end
+*)
