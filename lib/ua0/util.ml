@@ -95,7 +95,7 @@ module Ty = struct
     in
     equal assocs lsignature.return_type rsignature.return_type
 
-  let equal = equal []
+  let equal xs ys = equal [] xs ys
 
   let lift cstrs ty =
     List.fold_right (fun name ty -> Ast.App { name; ty }) cstrs ty
@@ -116,7 +116,9 @@ module Ty = struct
         let parameters = List.map (lift_boolean cstrs) parameters in
         Fun { tyvars; parameters; return_type }
 
+  (*
   let lty t ty = { Ast.t; ty }
+*)
 
   let rec ty_cstrs = function
     | (Ast.Bool | Var _ | Fun _) as e -> ([], e)
@@ -124,9 +126,10 @@ module Ty = struct
         let r, ty = ty_cstrs ty in
         (name :: r, ty)
 
+  (*
   let to_ty { Ast.t; ty } =
     List.fold_right (fun (name, _) ty -> Ast.TyApp { name; ty }) t ty
-
+*)
   let rec remove_prefix ctsrs ty =
     match ctsrs with
     | [] -> Some ty
@@ -136,6 +139,7 @@ module Ty = struct
         | App { name; ty; _ } ->
             if Ast.TyDeclIdent.equal t name then remove_prefix q ty else None)
 
+  (*
   let prefix lty = lty.Ast.t
   let nest lty = List.length lty.Ast.t
 
@@ -144,6 +148,7 @@ module Ty = struct
       ->
         Some ty
     | _ -> None
+*)
 
   let elt = function
     | Ast.App { ty; _ } -> Some ty
@@ -156,6 +161,7 @@ module Ty = struct
         Ast.TyDeclIdent.equal lname rname
     | _, _ -> false
 
+  (*
   let lcstreq lhs rhs =
     match (lhs, rhs) with
     | { Ast.t = lt; ty = lty }, { Ast.t = rt; ty = rty } -> (
@@ -163,6 +169,7 @@ module Ty = struct
         | [], [] -> cstrql lty rty
         | (l, _) :: _, (r, _) :: _ -> Ast.TyDeclIdent.equal l r
         | _, _ -> false)
+*)
 end
 
 module FunctionDecl = struct
