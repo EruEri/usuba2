@@ -1,10 +1,12 @@
 module TermIdent = struct
   let prepend prefix base =
+    (* XXX: this should be in the `Ident` module as `refresh` *)
     Ast.TermIdent.(fresh @@ Format.asprintf "%s%a" prefix pp base)
 end
 
 module FnIdent = struct
   let prepend prefix base =
+    (* XXX: this should be in the `Ident` module as `refresh` *)
     Ast.FnIdent.(fresh @@ Format.asprintf "%s%a" prefix pp base)
 end
 
