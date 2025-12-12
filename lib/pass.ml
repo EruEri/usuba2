@@ -103,12 +103,11 @@ module Idents = struct
         let func = sterm env func in
         let tys = List.map (Fun.flip Env.find_tycstr env) tys in
         Lift { tys; func }
-    | FnCall { fn_name; ty_resolve; args } ->
-        let fn_name = Either.fold ~left:Fun.id ~right:Fun.id fn_name in
-        let fn_name = Env.find_callable fn_name env in
+    | FnCall { fn; ty_resolve; args } ->
+        let fn = sterm env fn in
         let ty_resolve = Option.map (ty env) ty_resolve in
         let args = List.map (cterm env) args in
-        FnCall { fn_name; ty_resolve; args }
+        FnCall { fn; ty_resolve; args }
     | Operator ops ->
         let op = Operator.map (cterm env) ops in
         Operator op

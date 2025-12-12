@@ -94,8 +94,8 @@ ty:
     }
     
 %inline fn_identifier:
-    | fn_name=Identifier DOT ty_resolve=option(sqrbracketed(ty))  { 
-        fn_name, ty_resolve 
+    | fn=sterm DOT ty_resolve=option(sqrbracketed(ty))  {
+        fn, ty_resolve
     }
     
 %inline identifier_typed:
@@ -122,8 +122,8 @@ sterm:
         Lift {tys; func}
     }
     | fn=fn_identifier args=parenthesis(separated_list(COMMA, cterm)) {
-        let fn_name, ty_resolve = fn in
-        FnCall {fn_name = Either.Left fn_name; ty_resolve; args}
+        let fn, ty_resolve = fn in
+        FnCall {fn; ty_resolve; args}
     }
     | operator {
         Operator $1
@@ -137,11 +137,11 @@ sterm:
         args10=parenthesis(splitted(sterm, COMMA, sterm))
     {
         let acc, lterm = args10 in
-        let (fn_name, ty_resolve), const_args = fi in
+        let (fn, ty_resolve), const_args = fi in
         let const_args = Option.fold ~none:[] ~some:Fun.id const_args in
         List.init i Fun.id |> List.fold_left (fun acc i -> 
             let args = const_args @ (Synth acc) :: (Synth (Lookup {lterm; index = i})) :: [] in
-            FnCall {fn_name = Either.Left fn_name; ty_resolve; args }
+            FnCall {fn; ty_resolve; args }
         ) acc 
     }
     
