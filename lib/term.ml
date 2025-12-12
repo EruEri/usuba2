@@ -7,7 +7,7 @@ type 't sterm_ =
   | Circ of 't sterm_  (** [circ(l)] *)
   | Lift of { tys : 'ty_decl list; func : 't sterm_ }  (** [lift[F ...](f)] *)
   | FnCall of {
-      fn_name : ('fn_ident, 'term_id) Either.t;
+      fn : 't sterm_;
       ty_resolve : 't Ty.t option;
       args : 't cterm_ list;
     }  (** [f.[ty](t1, t2, ...)] *)
@@ -49,9 +49,6 @@ type 'a t = 'a cterm_
 let pps pp_var pp_ty_var pp_ty_decl pp_fn_ident =
   let pp_ty = Ty.pp_ pp_ty_var pp_ty_decl in
   let pp_decls format = Format.pp_print_list pp_ty_decl format in
-  let pp_fn_name format =
-    Format.pp_print_either ~left:pp_fn_ident ~right:pp_var format
-  in
   let rec go format = function
     | False -> Format.fprintf format "false"
     | True -> Format.fprintf format "true"
@@ -81,13 +78,13 @@ let pps pp_var pp_ty_var pp_ty_decl pp_fn_ident =
         Format.fprintf format "reindex[%a | %a](%a)" pp_decls lhs pp_decls rhs
           go_sterm_ lterm
     | Circ lterm -> Format.fprintf format "circ(%a)" go_sterm_ lterm
-    | FnCall { fn_name; ty_resolve; args } ->
+    | FnCall { fn; ty_resolve; args } ->
         let pp_ty_resolve =
           Format.pp_print_option (fun format ty ->
               Format.fprintf format "[%a]" pp_ty ty)
         in
-        Format.fprintf format "%a.%a(%a)" pp_fn_name fn_name pp_ty_resolve
-          ty_resolve pp_args args
+        Format.fprintf format "%a.%a(%a)" go_sterm_ fn pp_ty_resolve ty_resolve
+          pp_args args
     | Ann (tm, ty) -> Format.fprintf format "(%a : %a)" go tm pp_ty ty
   and pp_terms format =
     Format.pp_print_list
@@ -135,11 +132,13 @@ module S = struct
     let variable = Ident.TermIdent.fresh variable in
     Let { variable; term; k = k (v variable) }
 
-  let fn_call ?resolve fn_name args =
-    FnCall { fn_name = Left fn_name; ty_resolve = resolve; args }
+  let fn_call ?resolve fn_ident args =
+    let fn = Fn { fn_ident } in
+    FnCall { fn; ty_resolve = resolve; args }
 
   let v_call ?resolve variable_name args =
-    FnCall { fn_name = Right variable_name; ty_resolve = resolve; args }
+    let fn = Var variable_name in
+    FnCall { fn; ty_resolve = resolve; args }
 
   let circ t = Circ t
   let lift tys func = Lift { tys; func }
